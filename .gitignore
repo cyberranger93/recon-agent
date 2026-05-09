@@ -1,1 +1,7 @@
-__pycache__/\n*.pyc\n*.egg-info/\ndist/\n.venv/\noutput/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+.venv/
+output/
+.coverage

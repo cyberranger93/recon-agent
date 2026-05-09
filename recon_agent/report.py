@@ -1,9 +1,9 @@
 """Generate Markdown report from triaged findings."""
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 def generate_report(scope: str, subdomains: list[str], live_hosts: list[dict], triaged: list[dict]) -> str:
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     lines = [
         f"# Recon Report: `{scope}`",
         f"Generated: {now} by recon-agent",
@@ -36,10 +36,10 @@ def generate_report(scope: str, subdomains: list[str], live_hosts: list[dict], t
         impact = f.get("_impact", "")
         tags = f.get("info", {}).get("tags", [])
 
-        sev_emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🔵"}.get(sev, "⚪")
+        sev_marker = {"CRITICAL": "!!!", "HIGH": "!!", "MEDIUM": "!", "LOW": "-"}.get(sev, "-")
 
         lines += [
-            f"### {i}. {sev_emoji} [{sev}] {name}",
+            f"### {i}. {sev_marker} [{sev}] {name}",
             f"",
             f"- **Template:** `{template_id}`",
             f"- **Host:** `{host}`",

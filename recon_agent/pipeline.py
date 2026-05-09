@@ -5,6 +5,8 @@ Wraps external tools as subprocess calls with timeout + error handling.
 import subprocess
 import json
 import shutil
+import tempfile
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
@@ -68,16 +70,25 @@ def run_httpx(hosts: list[str], timeout: int = 60) -> tuple[list[dict], Optional
         return [], str(e)
 
 
+def build_nuclei_command(target_file: str, severity: str) -> list[str]:
+    return ["nuclei", "-silent", "-json", "-severity", severity, "-l", target_file]
+
+
 def run_nuclei(targets: list[str], severity: str = "medium,high,critical", timeout: int = 300) -> tuple[list[dict], Optional[str]]:
     if not _check_tool("nuclei"):
         return [], "nuclei not installed. Run: go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest"
     if not targets:
         return [], None
+    target_path: Path | None = None
     try:
-        targets_input = "\n".join(targets)
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as target_file:
+            target_file.write("\n".join(targets))
+            target_file.write("\n")
+            target_path = Path(target_file.name)
+
         result = subprocess.run(
-            ["nuclei", "-silent", "-json", "-severity", severity, "-l", "/dev/stdin"],
-            input=targets_input, capture_output=True, text=True, timeout=timeout
+            build_nuclei_command(str(target_path), severity),
+            capture_output=True, text=True, timeout=timeout
         )
         findings = []
         for line in result.stdout.strip().splitlines():
@@ -90,6 +101,9 @@ def run_nuclei(targets: list[str], severity: str = "medium,high,critical", timeo
         return [], "nuclei timed out"
     except Exception as e:
         return [], str(e)
+    finally:
+        if target_path is not None:
+            target_path.unlink(missing_ok=True)
 
 
 def run_pipeline(scope: str, severity: str = "medium,high,critical") -> PipelineResult:
