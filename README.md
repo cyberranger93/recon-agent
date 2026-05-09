@@ -6,7 +6,7 @@
 [![CI](https://github.com/cyberranger93/recon-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/cyberranger93/recon-agent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<!-- Add assets/demo.gif before launch. Show: raw Nuclei output -> triaged Markdown report. -->
+![recon-agent demo](assets/demo.gif)
 
 `recon-agent` runs a standard bug bounty recon chain, filters obvious noise, and produces a Markdown report with severity-ranked findings and draft impact statements.
 
